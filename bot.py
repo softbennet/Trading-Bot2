@@ -6,22 +6,10 @@ from config import API_KEY, API_SECRET  # API keys
 import csv
 from datetime import datetime
 from logger import log_trade
+from alerts import send_alert
 
 balance = 1000  # starting capital
 qty = 0  # position size
-
-if signal == 'buy':
-    price = df.iloc[-1]['close']
-    qty = balance / price
-    balance -= qty * price
-    log_trade('BUY', price, qty, balance)
-
-elif signal == 'sell' and qty > 0:
-    price = df.iloc[-1]['close']
-    balance += qty * price
-    log_trade('SELL', price, qty, balance)
-    qty = 0
-
 
 def log_trade(action, price, amount, balance):
     with open('trade_log.csv', 'a', newline='') as file:
@@ -71,6 +59,12 @@ while True:
             balance -= qty * price
             print(f"BUY @ {price}")
             log_trade('BUY', price, qty, balance)
+            send_alert(
+                subject="📈 BUY Signal Triggered",
+                body=f"Buy executed at ${price:.2f}, Qty: {qty}, Balance: {balance:.2f}"
+            )
+
+
         elif signal == 'sell' and qty > 0:
             print("📉 Sell Signal Triggered")
             # Place your sell order here
@@ -80,7 +74,13 @@ while True:
             balance += qty * price
             print(f"SELL @ {price}")
             log_trade('SELL', price, qty, balance)
-            qty = 0    
+            qty = 0
+            send_alert(
+                subject="📉 SELL Signal Triggered",
+                body=f"Sell executed at ${price:.2f}, Qty: {qty}, Balance: {balance:.2f}"
+            )
+
+    
         else:
             print("🔍 No Trade Signal")
 
