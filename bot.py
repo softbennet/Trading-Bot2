@@ -5,6 +5,23 @@ from strategy import check_signal  # Your trading logic
 from config import API_KEY, API_SECRET  # API keys
 import csv
 from datetime import datetime
+from logger import log_trade
+
+balance = 1000  # starting capital
+qty = 0  # position size
+
+if signal == 'buy':
+    price = df.iloc[-1]['close']
+    qty = balance / price
+    balance -= qty * price
+    log_trade('BUY', price, qty, balance)
+
+elif signal == 'sell' and qty > 0:
+    price = df.iloc[-1]['close']
+    balance += qty * price
+    log_trade('SELL', price, qty, balance)
+    qty = 0
+
 
 def log_trade(action, price, amount, balance):
     with open('trade_log.csv', 'a', newline='') as file:
@@ -49,10 +66,21 @@ while True:
             print("📈 Buy Signal Triggered")
             # Place your buy order here, e.g.
             # exchange.create_market_buy_order(symbol, qty)
-        elif signal == 'sell':
+            price = df.iloc[-1]['close']
+            qty = balance / price
+            balance -= qty * price
+            print(f"BUY @ {price}")
+            log_trade('BUY', price, qty, balance)
+        elif signal == 'sell' and qty > 0:
             print("📉 Sell Signal Triggered")
             # Place your sell order here
             # exchange.create_market_sell_order(symbol, qty)
+           
+            price = df.iloc[-1]['close']
+            balance += qty * price
+            print(f"SELL @ {price}")
+            log_trade('SELL', price, qty, balance)
+            qty = 0    
         else:
             print("🔍 No Trade Signal")
 
