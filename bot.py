@@ -36,6 +36,8 @@ def get_position_size(balance, price):
     risk_amount = balance * RISK_PERCENT
     return round(risk_amount / price, 6)  # 6 decimals for crypto precision
 
+send_alert("📈 Buy Signal Triggered at $34,200")
+
 # Main trading loop
 while True:
     try:
