@@ -36,3 +36,5 @@ def check_signal(df):
 
     # Otherwise, do nothing
     return 'hold'
+
+log_trade('BUY', latest['close'], qty, updated_balance)

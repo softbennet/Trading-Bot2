@@ -3,6 +3,13 @@ import pandas as pd
 import time
 from strategy import check_signal  # Your trading logic
 from config import API_KEY, API_SECRET  # API keys
+import csv
+from datetime import datetime
+
+def log_trade(action, price, amount, balance):
+    with open('trade_log.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([datetime.now(), action, price, amount, balance])
 
 # Initialize Binance with your API credentials
 exchange = ccxt.binance({
@@ -22,6 +29,12 @@ def fetch_data():
     df = pd.DataFrame(ohlcv, columns=['time', 'open', 'high', 'low', 'close', 'volume'])
     df['time'] = pd.to_datetime(df['time'], unit='ms')  # Convert timestamps to readable format
     return df
+
+RISK_PERCENT = 0.02  # 2% per trade
+
+def get_position_size(balance, price):
+    risk_amount = balance * RISK_PERCENT
+    return round(risk_amount / price, 6)  # 6 decimals for crypto precision
 
 # Main trading loop
 while True:
